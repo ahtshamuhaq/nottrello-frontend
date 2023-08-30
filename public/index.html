@@ -39,5 +39,11 @@
       To begin the development, run `npm start` or `yarn start`.
       To create a production bundle, use `npm run build` or `yarn build`.
     -->
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+      const socket = io.connect("http://localhost:5000");
+
+      // Now you can use the socket object to emit or listen to events.
+    </script>
   </body>
 </html>
