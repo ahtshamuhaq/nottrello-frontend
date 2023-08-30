@@ -1,10 +1,12 @@
-import React, { useState } from "react";
+import React from "react";
 import { dataBase } from "../firebase/FirebaseCofig";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
 const LoginPage = () => {
   const history = useNavigate();
+
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
@@ -16,6 +18,16 @@ const LoginPage = () => {
         password
       );
       const user = userCredential.user;
+      if (user) {
+        const token = await user.getIdToken();
+        axios
+          .post("http://localhost:5000/user/signup", {
+            token: token,
+            email: email,
+          })
+          .then((response) => {})
+          .catch((error) => {});
+      }
       console.log("user is", user);
       console.log("email is ", email);
       if (email === "admin3@gmail.com") {
@@ -30,7 +42,6 @@ const LoginPage = () => {
       console.error("Error signing in:", error);
     }
   };
-
   return (
     <div>
       <div className="flex min-h-screen flex-col justify-center items-center px-6 py-12 lg:px-8">
