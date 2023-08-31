@@ -10,24 +10,13 @@ import { toast } from "react-toastify";
 const HomePage = () => {
   const history = useNavigate();
   const { currentUser } = useAuth();
-  const [name, setName] = useState("");
-  const [askForName, setAskForName] = useState(true);
+
   const BASE_URL = "http://localhost:5000";
   const socket = io("http://localhost:5000");
 
   socket.on("reminder", (data) => {
     toast(data.message);
   });
-  useEffect(() => {
-    if (askForName) {
-      const userName = prompt("Please enter your name:");
-      if (userName) {
-        setName(userName);
-        localStorage.setItem("username", userName);
-      }
-      setAskForName(false);
-    }
-  }, [askForName]);
 
   useEffect(() => {
     if (currentUser && currentUser.email) {
@@ -264,9 +253,7 @@ const HomePage = () => {
           </div>
         </div>
         <div className=" w-11/12 mx-auto flex justify-between mt-4">
-          <h1 className="text-white font-semibold text-2xl">
-            Welcome, {name}!
-          </h1>
+          <h1 className="text-white font-semibold text-2xl">Welcome!</h1>
           <div>
             <button
               className="px-4 py-2 bg-black text-red-800 "
@@ -277,97 +264,112 @@ const HomePage = () => {
           </div>
         </div>
       </div>
-      {cards.map((todoItems, cardIndex) => {
-        return (
-          <div
-            key={cardIndex}
-            className="bg-black w-1/6 ml-3 mt-3 text-[#a6b1bd] p-3 rounded-lg flex flex-col"
-          >
-            {todoItems
-              .filter((item) => item.type === "title")
-              .map((title) => (
-                <div className="flex flex-col">
-                  {isEditing === title.id ? (
-                    <>
-                      <input
-                        value={editValue}
-                        onChange={(e) => setEditValue(e.target.value)}
-                      />
-                      <button
-                        className="text-white"
-                        onClick={() => saveEdit(title.id)}
-                      >
-                        Save Title
-                      </button>
-                      <button onClick={() => deleteWholeCard(cardIndex)}>
-                        Delete Whole Div
-                      </button>
-                    </>
-                  ) : (
-                    <>
-                      <h1>{title.text}</h1>
-                      <div className="flex">
+      <div className="flex flex-wrap justify-start items-start mt-4">
+        {cards.map((todoItems, cardIndex) => {
+          return (
+            <div
+              key={cardIndex}
+              className="bg-black w-1/6 ml-3 mt-3 text-[#a6b1bd] p-3 rounded-lg flex flex-col"
+            >
+              {todoItems
+                .filter((item) => item.type === "title")
+                .map((title) => (
+                  <div className="flex flex-col">
+                    {isEditing === title.id ? (
+                      <>
+                        <input
+                          value={editValue}
+                          onChange={(e) => setEditValue(e.target.value)}
+                        />
                         <button
-                          onClick={() => startEditing(title.id, title.text)}
+                          className="text-white"
+                          onClick={() => saveEdit(title.id)}
                         >
-                          Edit Title
+                          Save Title
                         </button>
-                        <button onClick={() => deleteWholeCard(cardIndex)}>
-                          Delete Whole Div
+                        <button
+                          className="ml-3 flex items-center justify-center text-red-500 hover:text-red-700 transition "
+                          onClick={() => deleteWholeCard(cardIndex)}
+                        >
+                          <i className="material-icons">delete</i>
                         </button>
-                      </div>
-                    </>
-                  )}
-                </div>
-              ))}
+                      </>
+                    ) : (
+                      <>
+                        <div className="flex justify-between">
+                          <h1>{title.text}</h1>
+                          <div className="flex items-center justify-center text-gray-600 hover:text-gray-800 transition">
+                            <button
+                              onClick={() => startEditing(title.id, title.text)}
+                            >
+                              <i className="material-icons">edit</i>
+                            </button>
 
-            {todoItems
-              .filter((item) => item.type === "item")
-              .map((item) => (
-                <div className="flex flex-col mt-3" key={item.id}>
-                  {isEditing === item.id ? (
-                    <>
-                      <input
-                        value={editValue}
-                        onChange={(e) => setEditValue(e.target.value)}
-                        className="ml-2"
-                      />
-                      <button onClick={() => saveEdit(item.id)}>Save</button>
-                    </>
-                  ) : (
-                    <>
-                      <h1 className="ml-2">{item.text}</h1>
-                      <select
-                        value={item.priority}
-                        onChange={(e) =>
-                          updatePriority(cardIndex, item.id, e.target.value)
-                        }
-                      >
-                        <option value="low">Low</option>
-                        <option value="medium">Medium</option>
-                        <option value="high">High</option>
-                      </select>
+                            <button
+                              className="ml-3 flex items-center justify-center text-red-500 hover:text-red-700 transition "
+                              onClick={() => deleteWholeCard(cardIndex)}
+                            >
+                              <i className="material-icons">delete</i>
+                            </button>
+                          </div>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                ))}
 
-                      <input
-                        type="datetime-local"
-                        value={item.reminder || ""}
-                        onChange={(e) =>
-                          updateReminder(cardIndex, item.id, e.target.value)
-                        }
-                      />
-                      <div className="flex">
-                        <button
-                          onClick={() => startEditing(item.id, item.text)}
+              {todoItems
+                .filter((item) => item.type === "item")
+                .map((item) => (
+                  <div className="flex flex-col mt-3" key={item.id}>
+                    {isEditing === item.id ? (
+                      <>
+                        <input
+                          value={editValue}
+                          onChange={(e) => setEditValue(e.target.value)}
+                          className="ml-2"
+                        />
+                        <button onClick={() => saveEdit(item.id)}>Save</button>
+                      </>
+                    ) : (
+                      <>
+                        <h1 className=" rounded-xl bg-slate-500 p-2">
+                          {item.text}
+                        </h1>
+                        <div className="flex mt-2 justify-between">
+                          <button
+                            onClick={() => startEditing(item.id, item.text)}
+                          >
+                            <i className="material-icons">edit</i>
+                          </button>
+                          <button
+                            className="ml-3"
+                            onClick={() => deleteTodoItem(cardIndex, item.id)}
+                          >
+                            <i className="material-icons">delete</i>
+                          </button>
+                        </div>
+
+                        <select
+                          value={item.priority}
+                          onChange={(e) =>
+                            updatePriority(cardIndex, item.id, e.target.value)
+                          }
+                          className="mt-2 mb-2"
                         >
-                          Edit
-                        </button>
-                        <button
-                          className="ml-3"
-                          onClick={() => deleteTodoItem(cardIndex, item.id)}
-                        >
-                          Delete
-                        </button>
-                        <div>
+                          <option value="low">Low</option>
+                          <option value="medium">Medium</option>
+                          <option value="high">High</option>
+                        </select>
+
+                        <input
+                          type="datetime-local"
+                          value={item.reminder || ""}
+                          onChange={(e) =>
+                            updateReminder(cardIndex, item.id, e.target.value)
+                          }
+                        />
+                        <div className="mt-2 flex justify-between">
                           Move to:
                           <select
                             onChange={(e) =>
@@ -388,21 +390,26 @@ const HomePage = () => {
                             )}
                           </select>
                         </div>
-                      </div>
-                    </>
-                  )}
-                </div>
-              ))}
-            <button
-              className="mt-3"
-              onClick={() => addItemForCard(cardIndex, "New Item")}
-            >
-              Add an item
-            </button>
-          </div>
-        );
-      })}
-      <button onClick={addNewCard}>CREATE NEW CARD</button>
+                      </>
+                    )}
+                  </div>
+                ))}
+              <button
+                className="mt-3 bg-gray-600 p-2 rounded-xl"
+                onClick={() => addItemForCard(cardIndex, "New Item")}
+              >
+                Add an item
+              </button>
+            </div>
+          );
+        })}
+        <button
+          className="flex items-center justify-center bg-[#ad738e] text-white mt-5 p-3 ml-3 rounded-3xl transition"
+          onClick={addNewCard}
+        >
+          <i className="material-icons">add</i> CREATE NEW CARD
+        </button>
+      </div>
     </div>
   );
 };
