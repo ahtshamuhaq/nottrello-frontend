@@ -76,6 +76,15 @@ const HomePage = () => {
     newCards[toCardIndex].push(itemToMove);
 
     setCards(newCards);
+    const targetCardTitle = cards[toCardIndex].find(
+      (item) => item.type === "title"
+    ).text;
+    if (targetCardTitle.toLowerCase() === "done") {
+      socket.emit("cardMovedToDone", {
+        userId: currentUser.id,
+        email: currentUser.email,
+      });
+    }
   };
 
   const addItemForCard = (cardIndex, text) => {
