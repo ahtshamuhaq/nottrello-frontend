@@ -2,9 +2,9 @@ import axios from "axios";
 import { signOut } from "firebase/auth";
 import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify";
-import { io } from "socket.io-client";
 import { dataBase } from "../firebase/FirebaseCofig";
 import { useNavigate } from "react-router-dom";
+import Ably from "ably";
 
 const AdminPage = () => {
   const [users, setUsers] = useState([]);
@@ -13,11 +13,15 @@ const AdminPage = () => {
   const [isEditing, setIsEditing] = useState(null);
   const [editValue, setEditValue] = useState("");
   const BASE_URL = "http://localhost:5000";
-  const socket = io("http://localhost:5000");
+  const ably = new Ably.Realtime(
+    "vrXrCA.OqwQXw:KQOb4-ZvefpMcDN-vfk1-meGK30RdJhkQGCsr1sjCmU"
+  );
+  const notificationChannel = ably.channels.get("notifications");
 
-  socket.on("adminNotification", (data) => {
-    toast(data.message);
+  notificationChannel.subscribe("cardMovedToDone", (message) => {
+    toast(message.data.message);
   });
+
   useEffect(() => {
     axios
       .get(`${BASE_URL}/user/all-users`)
@@ -113,7 +117,7 @@ const AdminPage = () => {
             NOTTRELLO DASHBOARD
           </h1>
           <div>
-            <h1 className="text-white font-semibold text-2xl">USER-PANEL</h1>
+            <h1 className="text-white font-semibold text-2xl">Admin-PANEL</h1>
           </div>
         </div>
         <div className=" w-11/12 mx-auto flex justify-between mt-4">

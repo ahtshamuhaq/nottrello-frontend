@@ -4,7 +4,7 @@ import { dataBase } from "../firebase/FirebaseCofig";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import axios from "axios";
-import io from "socket.io-client";
+import Ably from "ably";
 import { toast } from "react-toastify";
 
 const HomePage = () => {
@@ -12,11 +12,18 @@ const HomePage = () => {
   const { currentUser } = useAuth();
 
   const BASE_URL = "http://localhost:5000";
-  const socket = io("http://localhost:5000");
+  const ably = new Ably.Realtime(
+    "vrXrCA.OqwQXw:KQOb4-ZvefpMcDN-vfk1-meGK30RdJhkQGCsr1sjCmU"
+  );
+  const reminderChannel = ably.channels.get("reminder");
+  const notificationChannel = ably.channels.get("notifications");
 
-  socket.on("reminder", (data) => {
-    toast(data.message);
-  });
+  useEffect(() => {
+    const messageHandler = (message) => {
+      toast(message.data.message);
+    };
+    reminderChannel.subscribe("notify", messageHandler);
+  }, []);
 
   useEffect(() => {
     if (currentUser && currentUser.email) {
@@ -69,13 +76,25 @@ const HomePage = () => {
       (item) => item.type === "title"
     ).text;
     if (targetCardTitle.toLowerCase() === "done") {
-      socket.emit("cardMovedToDone", {
-        userId: currentUser.id,
-        email: currentUser.email,
+      notificationChannel.publish("cardMovedToDone", {
+        message: "Card moved to done by " + currentUser.email,
       });
     }
-  };
 
+    axios
+      .put(
+        `${BASE_URL}/user/dashboard/email/${encodeURIComponent(
+          currentUser.email
+        )}`,
+        { cards: newCards }
+      )
+      .then((response) => {
+        console.log("Data successfully updated:", response.data);
+      })
+      .catch((error) => {
+        console.error("Error updating data:", error);
+      });
+  };
   const addItemForCard = (cardIndex, text) => {
     const newCards = [...cards];
     newCards[cardIndex].push({
@@ -194,6 +213,19 @@ const HomePage = () => {
     newVisibilities.splice(cardIndex, 1);
     setCards(newCards);
     setCardsVisibility(newVisibilities);
+    axios
+      .put(
+        `${BASE_URL}/user/dashboard/email/${encodeURIComponent(
+          currentUser.email
+        )}`,
+        { cards: newCards }
+      )
+      .then((response) => {
+        console.log("Data successfully updated:", response.data);
+      })
+      .catch((error) => {
+        console.error("Error updating data:", error);
+      });
   };
   const updatePriority = (cardIndex, itemId, newPriority) => {
     const newCards = [...cards];
