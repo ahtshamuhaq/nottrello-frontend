@@ -11,7 +11,7 @@ const HomePage = () => {
   const history = useNavigate();
   const { currentUser } = useAuth();
 
-  const BASE_URL = "https://weak-ruby-oyster-ring.cyclic.app/";
+  const BASE_URL = "https://weak-ruby-oyster-ring.cyclic.app";
   const ably = new Ably.Realtime(
     "vrXrCA.OqwQXw:KQOb4-ZvefpMcDN-vfk1-meGK30RdJhkQGCsr1sjCmU"
   );
