@@ -12,7 +12,7 @@ const AdminPage = () => {
   const [userDashboard, setUserDashboard] = useState([]);
   const [isEditing, setIsEditing] = useState(null);
   const [editValue, setEditValue] = useState("");
-  const BASE_URL = "http://localhost:5000";
+  const BASE_URL = "https://weak-ruby-oyster-ring.cyclic.app/";
   const ably = new Ably.Realtime(
     "vrXrCA.OqwQXw:KQOb4-ZvefpMcDN-vfk1-meGK30RdJhkQGCsr1sjCmU"
   );
